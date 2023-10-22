@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crowdsourced Streetview</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            display: grid;
+            justify-items: center;
+            align-items: center;
+            background-color: #f3f4f6;
+        }
+        .container {
+            width: 700px;
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .upload-box {
+            width: 100%;
+            height: 150px;
+            border: 2px dashed #ccc;
+            color: #ccc;
+            line-height: 150px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-box.hover {
+            border: 2px dashed #666;
+            color: #666;
+        }
+        #loader {
+            display: none;
+        }
+        img {
+            max-width: 100%;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+        .img-wrap {
+            position: relative;
+            display: inline-block;
+        }
+        .img-wrap img {
+            max-width: 100%;
+        }
+        .img-wrap .close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Crowdsourced Streetview API</h1>
+    <form id="uploadForm">
+        <div class="upload-box" id="box1">
+            Upload Crowdsource
+        </div>
+        <div class="img-wrap hidden" id="imgWrap1">
+            <img id="preview1">
+            <div class="close hidden" id="close1"><b>X</b></div>
+        </div>
+        <input type="file" id="image1" name="image1" class="hidden">
+        <br>
+
+        <div class="upload-box" id="box2">
+            Upload Streetview
+        </div>
+        <div class="img-wrap hidden" id="imgWrap2">
+            <img id="preview2">
+            <div class="close hidden" id="close2">X</div>
+        </div>
+        <input type="file" id="image2" name="image2" class="hidden">
+        <br>
+
+        <button type="submit">Submit</button>
+    </form>
+    <div id="loader">Processing...</div>
+    <img id="resultImage" alt="Result will be shown here">
+    <button id="downloadBtn">Download</button>
+</div>
+
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const resultImage = document.getElementById('resultImage');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const loader = document.getElementById('loader');
+    const preview1 = document.getElementById('preview1');
+    const preview2 = document.getElementById('preview2');
+    
+    document.getElementById('image1').addEventListener('change', function() {
+      const file = this.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview1.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('image2').addEventListener('change', function() {
+      const file = this.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview2.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      loader.style.display = 'block';
+      
+      const formData = new FormData(form);
+      const response = await fetch('/overlay', {
+        method: 'POST',
+        body: formData
+      });
+
+      loader.style.display = 'none';
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      resultImage.src = url;
+      downloadBtn.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'overlay.png';
+        a.click();
+      });
+    });
+
+    document.querySelectorAll('.upload-box').forEach((box) => {
+    ['dragenter', 'dragover'].forEach((eventName) => {
+        box.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            box.classList.add('hover');
+        });
+    });
+    ['dragleave', 'drop'].forEach((eventName) => {
+        box.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            box.classList.remove('hover');
+        });
+    });
+});
+
+document.getElementById('box1').addEventListener('click', () => document.getElementById('image1').click());
+document.getElementById('box2').addEventListener('click', () => document.getElementById('image2').click());
+
+document.getElementById('box1').addEventListener('drop', (e) => {
+    const file = e.dataTransfer.files[0];
+    document.getElementById('image1').files = e.dataTransfer.files;
+    displayImage(file, 'preview1');
+});
+
+document.getElementById('box2').addEventListener('drop', (e) => {
+    const file = e.dataTransfer.files[0];
+    document.getElementById('image2').files = e.dataTransfer.files;
+    displayImage(file, 'preview2');
+});
+
+function displayImage(file, previewElement) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById(previewElement).src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+        // Function to toggle visibility
+        function toggleVisibility(elem) {
+            elem.classList.toggle("hidden");
+        }
+
+        // Image upload and close logic
+        ["1", "2"].forEach(num => {
+            const box = document.getElementById(`box${num}`);
+            const imgWrap = document.getElementById(`imgWrap${num}`);
+            const img = document.getElementById(`preview${num}`);
+            const close = document.getElementById(`close${num}`);
+            const input = document.getElementById(`image${num}`);
+
+            // Show image and hide box
+            img.addEventListener("load", () => {
+                toggleVisibility(box);
+                toggleVisibility(imgWrap);
+                toggleVisibility(close);
+            });
+
+            // Hide image and show box
+            close.addEventListener("click", () => {
+                toggleVisibility(box);
+                toggleVisibility(imgWrap);
+                toggleVisibility(close);
+                img.src = "";
+            });
+
+            // Re-upload image when clicking on the image
+            imgWrap.addEventListener("click", () => {
+                input.click();
+            });
+        });
+
+
+  </script>
+</body>
+</html>
