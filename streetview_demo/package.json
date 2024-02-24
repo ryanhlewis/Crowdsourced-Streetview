@@ -1,0 +1,16 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@fails-components/webtransport": "^1.0.8",
+    "@fails-components/webtransport-transport-http3-quiche": "^1.0.8",
+    "@nut-tree/nut-js": "^3.1.2",
+    "cloudflared": "^0.5.1",
+    "express": "^4.18.2",
+    "naudiodon": "^2.3.6",
+    "node-turn": "^0.0.6",
+    "puppeteer": "^21.11.0",
+    "robotjs": "^0.6.0",
+    "socket.io": "^4.7.4",
+    "speaker": "^0.5.4"
+  }
+}
