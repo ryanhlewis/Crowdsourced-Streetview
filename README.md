@@ -44,8 +44,18 @@ Crowdsourced Streetview is a cutting-edge solution designed to enhance Google St
 
 ---
 
+### Benchmark
+
+Since this is all done on-demand, we must take advantage of modern hardware. Specifically, we find usage of NVIDIA's TensorRT library makes our image alignment run at 19ms, which is tractable! For reference, using normal OpenCV algorithms, the time is expontential by image size and can take up to an hour, while with modern ML algorithms like MagicLeap's SuperPoint, we can do it in 5 seconds. 
+
+| TensorRT SuperPoint | SuperPoint | SIFT |
+|:-----------:|:----------:|:------:|
+| 19ms | 4.93s | 43m |
+
+---
+
 ### Get Involved
-Become a part of this revolutionary project that aims to make Streetview more dynamic, accurate, and informative. Contribute code and help us build a better visual world!
+Become a part of an effort that aims to make Streetview more dynamic, accurate, and informative. Contribute code and help us build a better visual world!
 
 For more information, reach out at [rl869@cornell.edu](mailto:rl869@cornell.edu).
 
